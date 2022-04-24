@@ -12,7 +12,7 @@ class ExchangePointTest {
     @BeforeEach
     void setUp() {
         fixedRatesProvider = new FixedRatesProvider();
-        fixedRatesProvider.setRate(Currency.PLN, Currency.EUR, new BigDecimal("4.7"));
+        fixedRatesProvider.setRate(Currency.EUR, Currency.PLN, new BigDecimal("4.7"));
         fixedRatesProvider.setRate(Currency.PLN, Currency.USD, new BigDecimal("4.0"));
     }
 
@@ -28,6 +28,7 @@ class ExchangePointTest {
                 () -> new ExchangePoint(fixedRatesProvider, BigDecimal.ONE) );
     }
 
+    @Test
     void shouldntAcceptSpreadBiggerThan1(){
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> new ExchangePoint(fixedRatesProvider, BigDecimal.TEN) );
@@ -35,16 +36,16 @@ class ExchangePointTest {
 
     @Test
     void shouldReturnBidPriceForCurrencyAfterSpread(){
-        ExchangePoint exchangePoint = new ExchangePoint(fixedRatesProvider, new BigDecimal("0.5"));
-        assertEquals(exchangePoint.getBidSpread(new BigDecimal("10"), Currency.PLN, Currency.EUR),
-                new BigDecimal("2.02"));
+        ExchangePoint exchangePoint = new ExchangePoint(fixedRatesProvider, new BigDecimal("0.05"));
+        assertEquals(exchangePoint.getBidPrice(new BigDecimal("10"), Currency.PLN, Currency.EUR),
+                new BigDecimal("2.0216"));
     }
 
     @Test
     void shouldReturnAskPriceForCurrencyAfterSpread(){
-        ExchangePoint exchangePoint = new ExchangePoint(fixedRatesProvider, new BigDecimal("0.5"));
-        assertEquals(exchangePoint.getBidSpread(new BigDecimal("10"), Currency.EUR, Currency.PLN),
-                new BigDecimal("44.65"));
+        ExchangePoint exchangePoint = new ExchangePoint(fixedRatesProvider, new BigDecimal("0.05"));
+        assertEquals(exchangePoint.getAskPrice(new BigDecimal("10"), Currency.EUR, Currency.PLN),
+                new BigDecimal("49.3500"));
     }
 
 

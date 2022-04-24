@@ -10,17 +10,31 @@ public class ExchangePoint {
     private final BigDecimal bidSpread;
 
     public ExchangePoint(RatesProvider ratesProvider, BigDecimal spread) {
+        if(spread.compareTo(BigDecimal.ZERO) < 0){
+            throw new IllegalArgumentException(String.format("Spread %s jest niepoprawny. Musi być dodatni", spread));
+        }
+        if(spread.compareTo(BigDecimal.ONE)>=0){
+            throw new IllegalArgumentException(String.format("Spread %s jest niepoprawny. Musi być mniejszy od zera", spread));
+        }
+
         this.ratesProvider = ratesProvider;
-        this.askSpread = spread;
-        this.bidSpread = spread;
-        //TODO
+        this.askSpread = BigDecimal.ONE.add(spread).setScale(SCALE, ROUNDING_MODE);
+        this.bidSpread = BigDecimal.ONE.subtract(spread).setScale(SCALE, ROUNDING_MODE);
+
     }
 
-    public BigDecimal getBidSpread(BigDecimal amount, Currency from, Currency to){
-        return null;
+    public BigDecimal getBidPrice(BigDecimal amount, Currency from, Currency to){
+
+        return getExchangePrice(amount,from,to, bidSpread);
     }
 
-    public BigDecimal getAskSpread(BigDecimal amount, Currency from, Currency to){
-        return null;
+    public BigDecimal getAskPrice(BigDecimal amount, Currency from, Currency to){
+        return getExchangePrice(amount,from,to, askSpread);
+    }
+
+    private BigDecimal getExchangePrice(BigDecimal amount, Currency from, Currency to, BigDecimal spread){
+        BigDecimal rate = ratesProvider.getRate(from, to);
+        BigDecimal amountInCurrency = amount.multiply(rate);
+        return amountInCurrency.multiply(spread).setScale(SCALE, ROUNDING_MODE);
     }
 }
